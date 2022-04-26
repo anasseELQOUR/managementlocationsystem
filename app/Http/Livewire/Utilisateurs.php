@@ -68,4 +68,19 @@ class Utilisateurs extends Component
 
         $this->dispatchBrowserEvent("showSuccessMessage", ["message"=>"Utilisateur créé avec succès!"]); // ceci pour afficher le message qui nous permet de savoir que l'utilisateur a été créé avec succés voir create.blade.php
     }
+
+    public function confirmDelete($name, $id){
+        $this->dispatchBrowserEvent("showConfirmMessage", ["message"=>[
+            "text"=>"Vous êtes sur le point de supprimer $name de la liste des utilisateurs. Voulez-vous continuer?",
+            "title"=>"Êtes-vous sûr de continuer?",
+            "type"=>"warning",
+            "data"=>array("user_id"=>$id)
+
+        ]]); //voir list.blade.php la fonction delete
+    }
+
+    public function deleteUser($id){
+        User::destroy($id);
+        $this->dispatchBrowserEvent("showSuccessMessage", ["message"=>"Utilisateur spprimé avec succès!"]);
+    }
 }

@@ -141,3 +141,4 @@
         })
     })
 </script>
+{{-- voir le composant livewire utilisateurs.php la fonction addUser() --}}

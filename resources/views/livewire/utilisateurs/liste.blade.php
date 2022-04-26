@@ -50,7 +50,7 @@
                         <td class="text-center"><span class="tag tag-success">{{ $user->created_at->diffForHumans() }}</span></td>
                         <td class="text-center">
                             <button class="btn btn-link"><i class="far fa-edit"></i></button>
-                            <button class="btn btn-link"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn btn-link" wire:click="confirmDelete('{{ $user->prenom }} {{ $user->nom }}', {{ $user->id }})"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
                 @endforeach
@@ -67,3 +67,33 @@
         </div>
     </div>
 </div>
+<script>
+    window.addEventListener("showConfirmMessage", event => {
+        Swal.fire({
+        title: event.detail.message.title,
+        text: event.detail.message.text,
+        icon: event.detail.message.type,
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Continuer',
+        cancelButtonText: 'Annuler'
+        }).then((result) => {
+        if (result.isConfirmed) {
+            @this.deleteUser(event.detail.message.data.user_id);
+        }
+        })
+    })
+
+        window.addEventListener("showSuccessMessage", event => {
+        Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            toast: true,
+            title: event.detail.message || "Opération effectuée avec succès!",
+            showConfirmButton: false,
+            timer:3000
+        })
+    })
+</script>
+{{-- voir le composant livewire utilisateurs.php la fonction confirmDelete() --}}
