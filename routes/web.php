@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UserController;
+use App\Http\Livewire\Utilisateurs;
 use Illuminate\Support\Facades\Route;
 use App\Models\Article;
 use App\Models\TypeArticle;
@@ -39,7 +40,7 @@ Route::group([
         "prefix"=>"habilitations",
         "as"=>"habilitations."
     ], function (){
-        Route::get("/utilisateurs", [UserController::class, "admin"])->name("users.index");
+        Route::get("/utilisateurs", Utilisateurs::class)->name("users.index");
         // pour accéder à utilisateurs on doit définir le chemin suivant le as admin. et le as habilitations. et le nom de la route comme cecci admin.habilitations.users.index  admin.habilitations.users.index
     });
 

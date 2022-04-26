@@ -17,14 +17,14 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('nom');
             $table->string('prenom');
-            $table->char('sexe');
+            $table->char('sexe')->default('H');
             $table->string('telephone1');
             $table->string('telephone2')->nullable();
             $table->string('pieceIdentite');
             $table->string('numeroPieceIdentite');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('photo');
+            $table->string('photo')->default('https://via.placeholder.com/640x480.png/0066cc?tex...');
             $table->timestamps();
         });
     }
