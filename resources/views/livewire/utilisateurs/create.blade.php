@@ -52,8 +52,8 @@
                         <label>Sexe</label>
                         <select wire:model="newUser.sexe" class="form-control @error('newUser.sexe') is-invalid @enderror">
                             <option value="">-----</option>
-                            <option value="H">Homme</option>
-                            <option value="F">Femme</option>
+                            <option value="0">Homme</option>
+                            <option value="1">Femme</option>
                         </select>
 
                         @error('newUser.sexe')
@@ -94,9 +94,9 @@
                         <label>Pièce d'identité</label>
                         <select class="form-control @error('newUser.pieceIdentite') is-invalid @enderror" wire:model="newUser.pieceIdentite">
                             <option value="">-----</option>
-                            <option value="CNI">CNI</option>
-                            <option value="PASSPORT">PASSPORT</option>
-                            <option value="PERMIS DE CONDUIRE">PERMIS DE CONDUIRE</option>
+                            <option value="0">CNI</option>
+                            <option value="1">PASSPORT</option>
+                            <option value="2">PERMIS DE CONDUIRE</option>
                         </select>
 
                         @error('newUser.pieceIdentite')
@@ -129,7 +129,7 @@
         </div>
     </div>
 </div>
-<script>
+{{-- <script>
     window.addEventListener("showSuccessMessage", event => {
         Swal.fire({
             position: 'top-end',
@@ -140,5 +140,5 @@
             timer:3000
         })
     })
-</script>
+</script> --}}
 {{-- voir le composant livewire utilisateurs.php la fonction addUser() --}}

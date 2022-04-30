@@ -17,7 +17,7 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('nom');
             $table->string('prenom');
-            $table->char('sexe')->default('H');
+            $table->char('sexe');
             $table->string('telephone1');
             $table->string('telephone2')->nullable();
             $table->string('pieceIdentite');
