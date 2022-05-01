@@ -121,29 +121,79 @@
             <div class="col-md-12">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-key fa-2x"></i> Réinitialisation de mot de passe</h3>
+                        <h3 class="card-title"><i class="fas fa-key fa-2x"></i> Réinitialisation de mot de passe
+                        </h3>
                     </div>
 
-                        <div class="card-body">
-                            <ul>
-                                <li>
-                                    <a href="" class="btn btn-link" wire:click.prevent="confirmPwdReset">Réinitialiser le mot de passe</a>
-                                    <span>(par défaut: "password")</span>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>
+                                <a href="" class="btn btn-link" wire:click.prevent="confirmPwdReset">Réinitialiser le
+                                    mot de passe</a>
+                                <span>(par défaut: "password")</span>
+                            </li>
+                        </ul>
+                    </div>
 
                 </div>
             </div>
             <div class="col-md-12 mt-4">
                 <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-fingerprint fa-2x"></i> Rôles & permissions</h3>
+                    <div class="card-header d-flex align-items-center">
+                        <h3 class="card-title flex-grow-1"><i class="fas fa-fingerprint fa-2x"></i> Rôles & permissions</h3>
+                        <button class="btn bg-gradient-success" wire:click="updateRoleAndPermissions"><i class="fas fa-check"> Appliquer les modifications</i></button>
                     </div>
 
-                        <div class="card-body">
+                    <div class="card-body">
 
+                        <div id="accordions">
+                            @foreach ($rolePermissions ["roles"] as $role)
+
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between">
+                                    <h4 class="card-title flex-grow-1">
+                                        <a href="#" data-parent="#accordions" aria-expanded="true">
+                                            {{ $role["role_nom"] }}
+                                        </a>
+                                    </h4>
+                                    <div
+                                        class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                                        <input type="checkbox" class="custom-control-input" wire:model.lazy="rolePermissions.roles.{{ $loop->index }}.active" {{-- ceci equivalent au rolePermissions["roles"][$loop->index][active]  et pour le wire:model est utilisé pour luer des inputs à des variables et pour lazy c'est pour appliquer des modification et que cette modification ne puisse s'appliquer partout et pour $loop->index pour récuperer en faite l'indice de la boucle cette variable est prédifinie même si on la déclare pas --}} @if($role["active"]) checked @endif id="customSwitch{{ $role["role_id"] }}">
+                                        <label for="customSwitch{{ $role["role_id"] }}" class="custom-control-label"> {{ $role["active"]? "Activé" : "Désactivé" }}</label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            @endforeach
+                            {{-- @json($rolePermissions["roles"]) --}}
                         </div>
+
+                    </div>
+
+                    <div class="p-3">
+                        <table class="table table-bordered">
+                            <thead>
+                                <th>Permissions</th>
+                                <th></th>
+                            </thead>
+                            <tbody>
+                                @foreach($rolePermissions["permissions"] as $permission)
+                                <tr>
+                                    <td>{{ $permission["permission_nom"] }}</td>
+                                    <td>
+                                        <div
+                                            class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                                            <input type="checkbox" class="custom-control-input" @if($permission["active"]) checked @endif wire:model.lazy="rolePermissions.permissions.{{ $loop->index }}.active" id="customSwitchPermission{{ $permission["permission_id"] }}">
+                                            <label for="customSwitchPermission{{ $permission["permission_id"] }}" class="custom-control-label"> {{ $permission["active"]? "Activé" : "Désactivé" }}</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                                {{-- @json($rolePermissions["permissions"]) --}}
+                            </tbody>
+                        </table>
+                    </div>
 
                 </div>
             </div>

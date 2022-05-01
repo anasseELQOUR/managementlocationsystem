@@ -1,7 +1,7 @@
 <div class="row p-4 pt-5">
     <div class="col-12">
         <div class="card">
-            <div class="card-header bg-primary  d-flex align-items-center">
+            <div class="card-header bg-gradient-primary  d-flex align-items-center">
                 <h3 class="card-title flex-grow-1"><i class="fas fa-users fa-2x"></i> Liste des utilisateurs</h3>
                 <div class="card-tools d-flex align-items-center">{{-- pour aligner le btn nouvel utilisateur et le champs de recherche on utilse la fonction de bootstrap d-flex afin de les aligner en ligne et pour les aligner verticalement on utilse la classe de boostrap align-items-center --}}
                     <a href="" class="btn btn-link text-white mr-4 d-block" wire:click.prevent="goToAddUser()"><i

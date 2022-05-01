@@ -2,11 +2,15 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Carbon\Carbon;
 
 class Utilisateurs extends Component
 {
@@ -15,10 +19,12 @@ class Utilisateurs extends Component
     protected $paginationTheme = "bootstrap";
     //public $isBtnAddClicked = false;
 
-    public $currentPage = "liste";
+    public $currentPage = PAGELIST;
 
     public $newUser = array();
     public $editUser = array();
+
+    public $rolePermissions = array(); // c cette variable qui va récupérer l'ensemble des rôles et permissions
 
     // protected $rules = [
     //     'newUser.nom' => 'required',
@@ -43,6 +49,9 @@ class Utilisateurs extends Component
 
     public function render()
     {
+
+        Carbon::setLocale("fr");
+
         return view('livewire.utilisateurs.index', [
             "users" => User::latest()->paginate(10)
         ])
@@ -82,17 +91,86 @@ class Utilisateurs extends Component
         $this->currentPage = PAGECREATEFORM;
     }
 
-    public function goToListUser()
-    {
-        $this->currentPage = PAGELIST;
-        $this->editUser = [];
-    }
 
     public function goToEditUser($id)
     {
         $this->editUser = User::find($id)->toArray();
         //dump($this->editUser);
         $this->currentPage = PAGEEDITFORM;
+
+        $this->populateRolePermissions();
+    }
+
+
+    public function populateRolePermissions()
+    {
+        $this->rolePermissions["roles"] = [];
+        $this->rolePermissions["permissions"] = [];
+
+        // la logique pour charger les r$oles et les permissions
+
+        $mapForCB = function ($value) {
+            return $value["id"];
+        };
+
+        $roleIds = array_map($mapForCB, User::find($this->editUser["id"])->roles->toarray()); // cette variable va en faite récupérer la valeur correspondante à l'Id user dans la table rôle c-à-d on a id = 2 dans la table user lui correspond le rôle admin autrement dit cette variable a pour role de récupérer le role de chaque utilisateur pour se faire on doit unire les deux tables
+        // la fonction roles() c la fonction qui matérialse la relation entre les deux tables users et roles voir dans user.php en profitant de cette relation on peut récupérer les différents roles des different utilisateur en se basant sur l'union des dex tables users et roles
+
+        //dump(User::find($this->editUser["id"])->roles->toarray());
+
+        //dump(User::find($this->editUser["id"])->roles->toarray());
+
+
+        foreach (Role::all() as $role) {
+            if (in_array($role->id, $roleIds)) {
+                array_push($this->rolePermissions["roles"], ["role_id" => $role->id, "role_nom" => $role->nom, "active" => true]);
+            } else {
+                array_push($this->rolePermissions["roles"], ["role_id" => $role->id, "role_nom" => $role->nom, "active" => false]);
+            }
+        }
+
+        // le foreach ici pour recupérer tous les rôles qui existe dans la table roles et par la suite va comparer ces dernier avec le role de l'utilisateur récupérer dans la table $roleIds s' ils sont pareil cette boucle attribuer à la table rolePermissions les valeurs suivantes l'identifiant de l'utilisateur le role de l'utilisateure et active sera un true dans le cas contraire cette boucle avec attribuer à a même table les mêmes valeurs sauf que pr active sera un false
+
+
+        $permissionIds = array_map($mapForCB, User::find($this->editUser["id"])->permissions->toarray());
+
+
+        foreach (Permission::All() as $permission) {
+            if (in_array($permission->id, $permissionIds)) {
+                array_push($this->rolePermissions["permissions"], ["permission_id" => $permission->id,  "permission_nom" => $permission->nom, "active" => true]);
+            } else {
+                array_push($this->rolePermissions["permissions"], ["permission_id" => $permission->id, "permission_nom" => $permission->nom, "active" => false]);
+            }
+        }
+          //dump($this->rolePermissions);
+    }
+
+    public function updateRoleAndPermissions(){
+        DB::table("user_role")->where("user_id", $this->editUser["id"])->delete(); //cette ligne pour récuperer tous les roles d'un utilisateur et les supprimer de la base de données afin d'appliquer les modifications
+        DB::table("user_permission")->where("user_id", $this->editUser["id"])->delete(); // même topo cette ligne pour récuperer toutes les permissions d'un utilisateur et les supprimer de la base de données afin d'appliquer la modification
+        // la boucle suivante va récupérer l'id de l'utilisateur qu'on veut modifier et va l'attribuer l'id du rôle qu'on va lui ajouter à traver a relation rôle()
+        foreach($this->rolePermissions["roles"] as $role){
+            if($role["active"]){
+                User::find($this->editUser["id"])->roles()->attach($role["role_id"]);
+            }
+        }
+
+        // même topo pour cette boucle qui va aussi récuperer l'id de l'utilisateur qu'on veut modifier et va l'attribuer l'id du permission qu'on va lui associer à traver la realtion permissions()
+         foreach($this->rolePermissions["permissions"] as $permission){
+             if($permission["active"]){
+                User::find($this->editUser["id"])->permissions()->attach($permission["permission_id"]);
+             }
+
+        }
+
+        $this->dispatchBrowserEvent("showSuccessMessage", ["message" => "Rôles et permissions mis à jour avec succès!"]); // ceci pour afficher le message qui nous permet de savoir que l'utilisateur a été créé avec succés voir create.blade.php
+
+    }
+
+    public function goToListUser()
+    {
+        $this->currentPage = PAGELIST;
+        $this->editUser = [];
     }
 
     public function addUser()
@@ -100,7 +178,7 @@ class Utilisateurs extends Component
         // Vérifier que les informations envoyées par le formulaire sont correctes
         $validationAttributes = $this->validate(); // si les régles pré-citées ci-dessus sont réspectées cette fonction passe à l'éxecution du reste du code c'est-à-dire le dump sinn il va s'arrêter ici et elle va rien faire
         // la fonction validate() nous renvois un tableau des attributs qui ont été validés
-        $validationAttributes["newUser"]["password"] = "password";
+        $validationAttributes["newUser"]["password"] = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 
         //dump($validationAttributes);
         // Ajouter un nouvel utilisteurs
@@ -125,7 +203,8 @@ class Utilisateurs extends Component
         $this->dispatchBrowserEvent("showSuccessMessage", ["message" => "Utilisateur mis à jour avec succès!"]);
     }
 
-    public function confirmPwdReset(){
+    public function confirmPwdReset()
+    {
         $this->dispatchBrowserEvent("showConfirmMessage", ["message" => [
             "text" => "Vous êtes sur le point de rénitialiser le mot de passe de cet utilisateur. Voulez-vous continuer?",
             "title" => "Êtes-vous sûr de continuer?",
@@ -133,11 +212,11 @@ class Utilisateurs extends Component
         ]]);
     }
 
-    public function resetPassword(){
-        User::find($this->editUser["id"])->update(["password"=>Hash::make(DEFAULTPASSWORD)]);
+    public function resetPassword()
+    {
+        User::find($this->editUser["id"])->update(["password" => Hash::make(DEFAULTPASSWORD)]);
 
         $this->dispatchBrowserEvent("showSuccessMessage", ["message" => "Mot de passe utilisateur a été réinitialiser avec succès!"]);
-
     }
 
     public function confirmDelete($name, $id)
